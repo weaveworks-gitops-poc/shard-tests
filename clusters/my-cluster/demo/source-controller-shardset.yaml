@@ -8,3 +8,4 @@ spec:
     name: source-controller
   shards:
     - name: shard1
+    - name: shard2
