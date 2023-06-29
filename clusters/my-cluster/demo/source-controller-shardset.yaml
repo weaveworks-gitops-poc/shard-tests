@@ -1,0 +1,10 @@
+apiVersion: templates.weave.works/v1alpha1
+kind: FluxShardSet
+metadata:
+  name: source-controller-shardset
+  namespace: flux-system
+spec:
+  sourceDeploymentRef:
+    name: source-controller
+  shards:
+    - name: shard1
