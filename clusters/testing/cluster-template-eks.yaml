@@ -1,0 +1,73 @@
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: "testing"
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks: ["192.168.0.0/16"]
+  infrastructureRef:
+    kind: AWSManagedCluster
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+    name: "testing"
+  controlPlaneRef:
+    kind: AWSManagedControlPlane
+    apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+    name: "testing-control-plane"
+---
+kind: AWSManagedCluster
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+metadata:
+  name: "testing"
+spec: {}
+---
+kind: AWSManagedControlPlane
+apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+metadata:
+  name: "testing-control-plane"
+spec:
+  region: "eu-west-1"
+  sshKeyName: "test"
+  version: "1.26"
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  name: "testing-md-0"
+spec:
+  clusterName: "testing"
+  replicas: ${WORKER_MACHINE_COUNT}
+  selector:
+    matchLabels:
+  template:
+    spec:
+      clusterName: "testing"
+      version: "1.26"
+      bootstrap:
+        configRef:
+          name: "testing-md-0"
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
+          kind: EKSConfigTemplate
+      infrastructureRef:
+        name: "testing-md-0"
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+        kind: AWSMachineTemplate
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: AWSMachineTemplate
+metadata:
+  name: "testing-md-0"
+spec:
+  template:
+    spec:
+      instanceType: "t3.large"
+      iamInstanceProfile: "nodes.cluster-api-provider-aws.sigs.k8s.io"
+      sshKeyName: "test"
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
+kind: EKSConfigTemplate
+metadata:
+  name: "testing-md-0"
+spec:
+  template: {}
